@@ -76,14 +76,8 @@ export default {
 			showLoading: true, //显示加载动画
 		}
 	},
-	async mounted(){
-		//获取数据
-		this.shopListArr = await shopList(this.latitude, this.longitude, this.offset, this.restaurantCategoryId);
-		this.hideLoading();
-		//开始监听scrollTop的值，达到一定程度后显示返回顶部按钮
-		showBack(status => {
-			this.showBackStatus = status;
-		});
+	mounted(){
+		this.initData();
 	},
 	components: {
 		loading,
@@ -97,30 +91,35 @@ export default {
 		])
 	},
 	methods: {
+		async initData(){
+			//获取数据
+			let res = await shopList(this.latitude, this.longitude, this.offset, this.restaurantCategoryId);
+			this.shopListArr = [...res];
+			this.hideLoading();
+			//开始监听scrollTop的值，达到一定程度后显示返回顶部按钮
+			showBack(status => {
+				this.showBackStatus = status;
+			});
+		},
 		//到达底部加载更多数据
 		async loaderMore(){
-			//demo因为是获取模拟数据，同步过程不需要进行判断
-			if (process.env.NODE_ENV == 'development') {
-				//防止重复请求
-				if (this.preventRepeatReuqest) {
-					return 
-				}
-				this.showLoading = true;
+			//防止重复请求
+			if (this.preventRepeatReuqest) {
+				return 
 			}
+			this.showLoading = true;
 			this.preventRepeatReuqest = true;
 
 			//数据的定位加20位
 			this.offset += 20;
 			let res = await shopList(this.latitude, this.longitude, this.offset, this.restaurantCategoryId);
-			this.preventRepeatReuqest = false;
+			this.hideLoading();
 			this.shopListArr = [...this.shopListArr, ...res];
-			if (process.env.NODE_ENV == 'development') {
-				this.hideLoading();
-				//当获取数据小于20，说明没有更多数据，不需要再次请求数据
-				if (res.length < 20) {
-					return
-				}
+			//当获取数据小于20，说明没有更多数据，不需要再次请求数据
+			if (res.length < 20) {
+				return
 			}
+			this.preventRepeatReuqest = false;
 		},
 		//返回顶部
 		backTop(){
@@ -128,10 +127,14 @@ export default {
 		},
 		//监听父级传来的数据发生变化时，触发此函数重新根据属性值获取数据
 		async listenPropChange(){
-			this.offset = 0;
 			this.showLoading = true;
-			this.shopListArr = await shopList(this.latitude, this.longitude, this.offset, '', this.restaurantCategoryIds, this.sortByType, this.deliveryMode, this.supportIds);
+			this.offset = 0;
+			let res = await shopList(this.latitude, this.longitude, this.offset, '', this.restaurantCategoryIds, this.sortByType, this.deliveryMode, this.supportIds);
 			this.hideLoading();
+			this.shopListArr = [...res];
+			if (process.env.NODE_ENV !== 'development') {
+				this.shopListArr = this.shopListArr.reverse();
+			}
 		},
 		hideLoading(){
 			if (process.env.NODE_ENV !== 'development') {

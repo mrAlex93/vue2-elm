@@ -171,9 +171,11 @@
                                             <span>{{item.price}}</span>
                                         </div>
                                         <section class="cart_list_control">
-                                            <svg @click="removeOutCart(item.category_id, item.item_id, item.food_id, item.name, item.price, item.specs)">
-                                                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#cart-minus"></use>
-                                            </svg>
+                                            <span @click="removeOutCart(item.category_id, item.item_id, item.food_id, item.name, item.price, item.specs)">
+                                                <svg>
+                                                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#cart-minus"></use>
+                                                </svg>
+                                            </span>
                                             <span class="cart_num">{{item.num}}</span>
                                             <svg class="cart_add" @click="addToCart(item.category_id, item.item_id, item.food_id, item.name, item.price, item.specs)">
                                                 <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#cart-add"></use>
@@ -357,11 +359,9 @@
         created(){
             this.geohash = this.$route.query.geohash;
             this.shopId = this.$route.query.id;
-            //初始化购物车，获取存储在localStorage中的购物车商品信息
             this.INIT_BUYCART();
         },
         mounted(){
-            //初始化数据
             this.initData();
             this.windowHeight = window.innerHeight;
         },
@@ -375,11 +375,9 @@
             ...mapState([
                 'latitude','longitude','cartList'
             ]),
-            //商铺公告
             promotionInfo: function (){ 
                 return this.shopDetailData.promotion_info || '欢迎光临，用餐高峰期请提前下单，谢谢。'
             },
-            //配送费
             deliveryFee: function () { 
                 if (this.shopDetailData) {
                     return this.shopDetailData.float_delivery_fee;
@@ -458,7 +456,6 @@
                     click: true,
                 });
 
-                //判断scrollTop的值，则满足条件，改变对应列表标题样式
                 this.foodScroll.on('scroll', (pos) => {
                     this.shopListTop.forEach((item, index) => {
                         if (this.menuIndexChange && Math.abs(Math.round(pos.y)) >= item) {
@@ -481,7 +478,6 @@
                     this.menuIndexChange = true;
                 })
             },
-            //控制显示列表标题详情提示
             showTitleDetail(index){
                 if (this.TitleDetailIndex == index) {
                     this.TitleDetailIndex = null;
@@ -606,7 +602,6 @@
                 this.ADD_CART({shopid: this.shopId, category_id, item_id, food_id, name, price, specs, packing_fee, sku_id, stock});
                 this.showChooseList();
             },
-            //点击多规格商品的减按钮，弹出提示
             showReduceTip(){
                 this.showDeleteTip = true;
                 clearTimeout(this.timer);
@@ -630,10 +625,8 @@
                 el.children[0].style.transform = `translate3d(0,0,0)`;
                 el.style.transition = 'transform .55s cubic-bezier(0.3, -0.25, 0.7, -0.15)';
                 el.children[0].style.transition = 'transform .55s linear';
-                //圆点到达目标点后移出
                 this.showMoveDot = this.showMoveDot.map(item => false);
                 el.children[0].style.opacity = 1;
-                //监听运动结束，通知父级进行后续操作
                 el.children[0].addEventListener('transitionend', () => {
                     this.listenInCart();
                 })
@@ -1211,15 +1204,20 @@
                 .cart_list_control{
                     display: flex;
                     align-items: center;
+                    span{
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
                     svg{
-                        @include wh(.8rem, .8rem);
+                        @include wh(.9rem, .9rem);
                         fill: #3190e8;
                     }
                     .specs_reduce_icon{
                         fill: #999;
                     }
                     .cart_num{
-                        @include sc(.6rem, #666);
+                        @include sc(.65rem, #666);
                         min-width: 1rem;
                         text-align: center;
                         font-family: Helvetica Neue,Tahoma;
@@ -1499,7 +1497,7 @@
         left: 30px;
     
         svg{
-            @include wh(.8rem, .8rem);
+            @include wh(.9rem, .9rem);
             fill: #3190e8;
         }
     }
